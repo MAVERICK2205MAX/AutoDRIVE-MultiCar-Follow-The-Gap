@@ -9,14 +9,18 @@
 [![Python](https://img.shields.io/badge/Python-3.10-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
 [![Simulator](https://img.shields.io/badge/AutoDRIVE_Simulator-v0.3.0-FF6F00?style=for-the-badge&logo=unity&logoColor=white)](https://autodrive-ecosystem.github.io/)
 [![Platform](https://img.shields.io/badge/Platform-Ubuntu_22.04_LTS-E95420?style=for-the-badge&logo=ubuntu&logoColor=white)](https://ubuntu.com/)
+[![YouTube](https://img.shields.io/badge/YouTube-Watch%20Live%20Demo-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://youtu.be/t3gYlpG6Nx8?si=EEaeVSPq3hgG2bVo)
 [![License](https://img.shields.io/badge/License-MIT-success?style=for-the-badge)](LICENSE)
 
 <br/>
 
-<img src="media/autodrive_2cars_live.png" alt="Dual F1TENTH Cars Racing in Trackcam Mode" width="95%" style="border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);"/>
+<a href="https://youtu.be/t3gYlpG6Nx8?si=EEaeVSPq3hgG2bVo" target="_blank">
+  <img src="media/autodrive_2cars_live.png" alt="Dual F1TENTH Cars Racing in Trackcam Mode - Click to Watch on YouTube" width="95%" style="border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);"/>
+</a>
 
 <p align="center">
-  <b>Figure 1:</b> <i>Two autonomous F1TENTH vehicles (Car 1 Black/Red, Car 2 Blue) racing simultaneously in ONE single AutoDRIVE Simulator window in Trackcam mode without collisions.</i>
+  ▶️ <b><a href="https://youtu.be/t3gYlpG6Nx8?si=EEaeVSPq3hgG2bVo">Click on the image above or here to watch the full race on YouTube!</a></b><br/>
+  <i>Two autonomous F1TENTH vehicles (Car 1 Black/Red, Car 2 Blue) racing simultaneously in ONE single AutoDRIVE Simulator window in Trackcam mode without collisions.</i>
 </p>
 
 </div>
@@ -25,6 +29,7 @@
 
 ## 📋 Table of Contents
 - [Overview](#-overview)
+- [Video Demonstration](#-video-demonstration)
 - [Key Features](#-key-features)
 - [System Architecture](#-system-architecture)
 - [Algorithm & Mathematical Formulation](#-algorithm--mathematical-formulation)
@@ -46,9 +51,21 @@
 This repository implements a **multi-agent autonomous racing stack** for two $1:10$-scale F1TENTH vehicles competing on a closed-circuit racetrack inside a **single AutoDRIVE Simulator instance**.
 
 Operating on **ROS 2 Humble**, both vehicles autonomously execute a reactive **Follow The Gap (FTG)** controller equipped with:
-1. Dynamic LiDAR safety bubbles to mask proximate obstacles and vehicles.
-2. Contiguous free-space gap evaluation.
-3. Multi-tier reactive throttle pacing to enable close-quarter drafting and overtaking while strictly preventing rear-end and wall collisions.
+1. **Dynamic LiDAR safety bubbles** to project obstacle clearance shadows around other vehicles and walls.
+2. **Contiguous free-space gap evaluation** across a frontal $\pm 70^\circ$ Field of View.
+3. **Multi-tier reactive throttle pacing** to enable close-quarter drafting and overtaking while strictly preventing rear-end and barrier collisions.
+
+---
+
+## 🎥 Video Demonstration
+
+Check out the full live autonomous racing demonstration on YouTube:
+
+[![YouTube Video](https://img.shields.io/badge/YouTube-Watch%20Live%20Race%20Video-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://youtu.be/t3gYlpG6Nx8?si=EEaeVSPq3hgG2bVo)
+
+Direct Link: **[https://youtu.be/t3gYlpG6Nx8](https://youtu.be/t3gYlpG6Nx8?si=EEaeVSPq3hgG2bVo)**
+
+A downloadable high-definition recording is also bundled directly in this repository at [`media/autodrive_2cars_track_race.mp4`](media/autodrive_2cars_track_race.mp4).
 
 ---
 
@@ -223,9 +240,9 @@ The steering setpoint angle $\delta$ targets the center of $\text{Gap}^*$:
 ```bash
 # Clone the repository
 cd ~/autodrive_ws/src
-# (Or symlink packages from this repository)
+git clone https://github.com/MAVERICK2205MAX/AutoDRIVE-MultiCar-Follow-The-Gap.git
 
-# Build both packages
+# Build packages
 cd ~/autodrive_ws
 colcon build --packages-select autodrive_f1tenth gap_follow --symlink-install
 source install/setup.bash
@@ -269,6 +286,7 @@ bash scripts/stop_autodrive.sh
 
 ## 🤝 References & Acknowledgments
 
+- **YouTube Demonstration**: [Live 2-Car Race Video](https://youtu.be/t3gYlpG6Nx8?si=EEaeVSPq3hgG2bVo)
 - **AutoDRIVE Ecosystem**: [AutoDRIVE Documentation & Devkit](https://autodrive-ecosystem.github.io/) developed by Tinker Twins.
 - **F1TENTH Foundation**: [F1TENTH Autonomous Racing Community](https://f1tenth.org/).
 - **Follow The Gap Method**: Sezer & Dikmen, *"Follow the Gap Method for Autonomous Mobile Robot Navigation"*.
