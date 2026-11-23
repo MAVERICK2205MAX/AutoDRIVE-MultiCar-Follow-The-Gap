@@ -35,14 +35,19 @@
 - [Algorithm & Mathematical Formulation](#-algorithm--mathematical-formulation)
 - [Repository Structure](#-repository-structure)
 - [Topic Mapping Reference](#-topic-mapping-reference)
+- [Step-by-Step Implementation Guide (How We Did It)](#-step-by-step-implementation-guide-how-we-did-it)
+  - [Step 1: Load or Build a 2-Car Simulator Scene](#step-1-load-or-build-a-2-car-simulator-scene)
+  - [Step 2: Check & Extend the autodrive_f1tenth Bridge for f1tenth_2](#step-2-check--extend-the-autodrive_f1tenth-bridge-for-f1tenth_2)
+  - [Step 3: Run Two gap_follow Controllers (One per Car)](#step-3-run-two-gap_follow-controllers-one-per-car)
+  - [Step 4: Connect the Simulator, Set Modes & Verify](#step-4-connect-the-simulator-set-modes--verify)
 - [Quick Start Guide](#-quick-start-guide)
   - [Prerequisites](#prerequisites)
   - [Workspace Setup & Build](#workspace-setup--build)
-  - [Launch Dual-Car Simulation](#launch-dual-car-simulation)
+  - [1-Click Launch Script](#1-click-launch-script)
   - [Record Video Demonstrations](#record-video-demonstrations)
   - [Clean Shutdown](#clean-shutdown)
 - [Verification & Experimental Results](#-verification--experimental-results)
-- [References & Acknowledgments](#-references--acknowledgments)
+- [Helpful Links & References](#-helpful-links--references)
 
 ---
 
@@ -227,6 +232,92 @@ The steering setpoint angle $\delta$ targets the center of $\text{Gap}^*$:
 
 ---
 
+## 🛠️ Step-by-Step Implementation Guide (How We Did It)
+
+To run two cars inside a single AutoDRIVE Simulator instance using a ROS 2 Humble setup, both the **Simulator scene** and the **ROS 2 bridge / controllers** must handle two separate vehicle IDs (`V1` / `f1tenth_1` and `V2` / `f1tenth_2`).
+
+Below is the complete 4-step engineering methodology used to build and verify this multi-vehicle autonomous racing system:
+
+---
+
+### Step 1: Load or Build a 2-Car Simulator Scene
+A standard single-car F1TENTH racing executable only spawns one vehicle (`V1`). To instantiate two cars in the same simulator window, there are two options:
+
+* **Option A — Pre-Built Multi-Agent Binary (No Unity needed - Used in this Project)**:
+  - Launch a multi-vehicle scenario from AutoDRIVE Simulator v0.3.0 or the **AutoDRIVE MRDT-MARL** (Multi-Agent Reinforcement Learning) release (such as the F1TENTH head-to-head racing scene).
+  - This executable already spawns two vehicles (`F1TENTH_1` and `F1TENTH_2`) on the track with distinct collision hulls and independent sensor pipelines.
+* **Option B — Add a Second Car in Unity (If editing from source)**:
+  1. Open the `AutoDRIVE-Simulator` project in **Unity 2021.3.9f1 (LTS)**.
+  2. In the **Hierarchy** panel, duplicate the existing F1TENTH vehicle object (`Ctrl + D`) and move the second car a few meters behind or beside the first car so they do not overlap at spawn.
+  3. Select the second car, open its vehicle/communication script in the **Inspector**, and change its Vehicle ID from `V1` to `V2`.
+  4. Press **Play** (or build the Linux/Windows executable).
+
+---
+
+### Step 2: Check & Extend the `autodrive_f1tenth` Bridge for `f1tenth_2`
+The bridge in `~/autodrive_ws/src/autodrive_ros2/autodrive_f1tenth` connects to the simulator over **Socket.IO on Port 4567**. Both incoming sensor data and outgoing control commands were checked and extended to support `V2` (`f1tenth_2`):
+
+1. **Search bridge files for V2 support**:
+   ```bash
+   grep -rn "f1tenth_2\|V2" ~/autodrive_ws/src/autodrive_ros2/autodrive_f1tenth/
+   ```
+2. **Bridge Upgrades**:
+   * **Incoming data (`Simulator` $\rightarrow$ `ROS 2`)** (`autodrive_incoming_bridge.py`):
+     Read `data["V2"]` from the Socket.IO payload and publish its LiDAR scan to `/autodrive/f1tenth_2/lidar`, IPS position to `/autodrive/f1tenth_2/ips`, and IMU data to `/autodrive/f1tenth_2/imu`.
+   * **Outgoing commands (`ROS 2` $\rightarrow$ `Simulator`)** (`autodrive_outgoing_bridge.py`):
+     Subscribe to `/autodrive/f1tenth_2/throttle_command` and `/autodrive/f1tenth_2/steering_command`, and format `V2` within the JSON dictionary emitted back to Port 4567.
+3. **Rebuild the workspace**:
+   ```bash
+   cd ~/autodrive_ws
+   colcon build --packages-select autodrive_f1tenth
+   source install/setup.bash
+   ```
+
+---
+
+### Step 3: Run Two `gap_follow` Controllers (One per Car)
+To run Multi-Car Follow The Gap, launch two separate instances of the `gap_follow` node (`reactive_node_multicar`)—one mapped to `f1tenth_1` and one mapped to `f1tenth_2` using ROS 2 topic remappings:
+
+* **Terminal 1 — Start the ROS 2 Bridge**:
+  ```bash
+  cd ~/autodrive_ws && source install/setup.bash
+  ros2 launch autodrive_f1tenth simulator_bringup_headless.launch.py
+  ```
+* **Terminal 2 — Start Controller for Car 1 (`f1tenth_1`)**:
+  ```bash
+  cd ~/autodrive_ws && source install/setup.bash
+  ros2 run gap_follow reactive_node_multicar --ros-args \
+    -r __node:=gap_follow_car1 \
+    -r /autodrive/f1tenth_1/lidar:=/autodrive/f1tenth_1/lidar \
+    -r /autodrive/f1tenth_1/throttle_command:=/autodrive/f1tenth_1/throttle_command \
+    -r /autodrive/f1tenth_1/steering_command:=/autodrive/f1tenth_1/steering_command
+  ```
+* **Terminal 3 — Start Controller for Car 2 (`f1tenth_2`)**:
+  ```bash
+  cd ~/autodrive_ws && source install/setup.bash
+  ros2 run gap_follow reactive_node_multicar --ros-args \
+    -r __node:=gap_follow_car2 \
+    -r /autodrive/f1tenth_1/lidar:=/autodrive/f1tenth_2/lidar \
+    -r /autodrive/f1tenth_1/throttle_command:=/autodrive/f1tenth_2/throttle_command \
+    -r /autodrive/f1tenth_1/steering_command:=/autodrive/f1tenth_2/steering_command
+  ```
+
+---
+
+### Step 4: Connect the Simulator, Set Modes & Verify
+1. **Verify Topics**:
+   Run `ros2 topic list` in a new terminal to confirm both `/autodrive/f1tenth_1/...` and `/autodrive/f1tenth_2/...` topic pipelines are actively broadcasting.
+2. **Launch Simulator**:
+   Launch the AutoDRIVE Simulator executable (`AutoDRIVE Simulator.x86_64`).
+3. **Switch Driving Mode**:
+   In the simulator GUI, switch both vehicles from **Manual** to **Autonomous** mode.
+4. **Connect Bridge**:
+   Verify the connection IP is `127.0.0.1` and Port is `4567`, then click **Connect**. Both cars receive independent LiDAR scans and drive simultaneously using the Follow The Gap algorithm.
+5. **Set Camera to Trackcam**:
+   Cycle the camera view until reaching **`Trackcam`** to obtain an overhead view showing both cars racing on the track.
+
+---
+
 ## 🚀 Quick Start Guide
 
 ### Prerequisites
@@ -248,8 +339,8 @@ colcon build --packages-select autodrive_f1tenth gap_follow --symlink-install
 source install/setup.bash
 ```
 
-### Launch Dual-Car Simulation
-To launch the complete dual-car stack with automated GUI handshake in Trackcam mode:
+### 1-Click Launch Script
+Instead of opening multiple terminals manually, launch the complete dual-car stack with automated GUI handshake in Trackcam mode with one command:
 
 ```bash
 bash scripts/start_autodrive_2cars_single_sim.sh
@@ -284,12 +375,18 @@ bash scripts/stop_autodrive.sh
 
 ---
 
-## 🤝 References & Acknowledgments
+## 🔗 Helpful Links & References
 
-- **YouTube Demonstration**: [Live 2-Car Race Video](https://youtu.be/t3gYlpG6Nx8?si=EEaeVSPq3hgG2bVo)
-- **AutoDRIVE Ecosystem**: [AutoDRIVE Documentation & Devkit](https://autodrive-ecosystem.github.io/) developed by Tinker Twins.
-- **F1TENTH Foundation**: [F1TENTH Autonomous Racing Community](https://f1tenth.org/).
-- **Follow The Gap Method**: Sezer & Dikmen, *"Follow the Gap Method for Autonomous Mobile Robot Navigation"*.
+### Helpful Links
+* [AutoDRIVE Simulator & Devkit Releases (v0.3.0)](https://autodrive-ecosystem.github.io/)
+* [AutoDRIVE Multi-Agent Repository (MRDT-MARL)](https://github.com/Tinker-Twins/AutoDRIVE/tree/mrdt-marl)
+* [AutoDRIVE RoboRacer Sim Racing Repository](https://github.com/Tinker-Twins/AutoDRIVE-RoboRacer)
+* [YouTube Demonstration: Live 2-Car Race Video](https://youtu.be/t3gYlpG6Nx8?si=EEaeVSPq3hgG2bVo)
+
+### References & Acknowledgments
+* **AutoDRIVE Ecosystem**: Developed by Tinker Twins ([Documentation & Devkit](https://autodrive-ecosystem.github.io/)).
+* **F1TENTH Foundation**: Open-source autonomous racing platform and community ([f1tenth.org](https://f1tenth.org/)).
+* **Follow The Gap Method**: Sezer & Dikmen, *"Follow the Gap Method for Autonomous Mobile Robot Navigation"*.
 
 ---
 
