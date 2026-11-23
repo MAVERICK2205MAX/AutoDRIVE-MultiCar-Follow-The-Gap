@@ -9,10 +9,21 @@ set -e
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 bash "$DIR/stop_autodrive.sh"
 
+WS_DIR="${AUTODRIVE_WS:-$HOME/autodrive_ws}"
+
 echo "=== Sourcing ROS 2 and Virtual Environment ==="
 source /opt/ros/humble/setup.bash
-source "$DIR/venv/bin/activate"
-source "$DIR/install/setup.bash"
+if [ -f "$DIR/venv/bin/activate" ]; then
+  source "$DIR/venv/bin/activate"
+elif [ -f "$WS_DIR/venv/bin/activate" ]; then
+  source "$WS_DIR/venv/bin/activate"
+fi
+
+if [ -f "$DIR/install/setup.bash" ]; then
+  source "$DIR/install/setup.bash"
+elif [ -f "$WS_DIR/install/setup.bash" ]; then
+  source "$WS_DIR/install/setup.bash"
+fi
 
 export DISPLAY=${DISPLAY:-:0}
 unset RMW_IMPLEMENTATION
@@ -58,7 +69,13 @@ echo "=== Launching 2-Car AutoDRIVE Simulator Window ==="
 SIM_PID=$!
 
 echo "=== Auto-interacting with Simulator GUI (Connect, Autonomous & Trackcam) ==="
-"$DIR/venv/bin/python" "$DIR/auto_interact_marl.py" > /tmp/auto_interact.log 2>&1 &
+PYTHON_EXEC="python3"
+if [ -f "$DIR/venv/bin/python" ]; then
+  PYTHON_EXEC="$DIR/venv/bin/python"
+elif [ -f "$WS_DIR/venv/bin/python" ]; then
+  PYTHON_EXEC="$WS_DIR/venv/bin/python"
+fi
+"$PYTHON_EXEC" "$DIR/auto_interact_marl.py" > /tmp/auto_interact.log 2>&1 &
 
 cat << 'EOF'
 

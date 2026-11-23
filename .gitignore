@@ -4,6 +4,10 @@ install/
 log/
 .colcon/
 
+# ROS 2 Bag Data (large binary files)
+*.db3
+*.mcap
+
 # Python Cache
 __pycache__/
 *.py[cod]

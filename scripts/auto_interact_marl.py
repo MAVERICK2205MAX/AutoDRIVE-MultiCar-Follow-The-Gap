@@ -94,14 +94,14 @@ def main():
     mouse = Controller()
 
     # Exact calibrated button locations in 1280x720 window:
-    # Button 1: Connect -> (wx + 150, wy + 275)
-    # Button 2: Driving Mode -> Autonomous -> (wx + 150, wy + 325)
+    # Button 1: Connect -> (wx + 120, wy + 270)
+    # Button 2: Driving Mode -> Autonomous -> (wx + 120, wy + 320)
     # Button 3: Camera Mode -> Trackcam -> (wx + 100, wy + 395)
-    conn_x = wx + 150
-    conn_y = wy + 275
+    conn_x = wx + 120
+    conn_y = wy + 270
 
-    auto_x = wx + 150
-    auto_y = wy + 325
+    auto_x = wx + 120
+    auto_y = wy + 320
 
     cam_x = wx + 100
     cam_y = wy + 395

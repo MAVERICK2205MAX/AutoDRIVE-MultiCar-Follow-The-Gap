@@ -45,6 +45,7 @@
   - [Workspace Setup & Build](#workspace-setup--build)
   - [1-Click Launch Script](#1-click-launch-script)
   - [Record Video Demonstrations](#record-video-demonstrations)
+  - [Record ROS 2 Bag Data](#record-ros-2-bag-data)
   - [Clean Shutdown](#clean-shutdown)
 - [Verification & Experimental Results](#-verification--experimental-results)
 - [Helpful Links & References](#-helpful-links--references)
@@ -190,8 +191,12 @@ The steering setpoint angle $\delta$ targets the center of $\text{Gap}^*$:
 ├── media/                                 # Video captures & race screenshots
 │   ├── autodrive_2cars_live.png           # Trackcam screenshot of dual-car race
 │   └── autodrive_2cars_track_race.mp4     # 720p HD MP4 race recording
+├── rosbags/                               # Recorded ROS 2 telemetry datasets
+│   └── f1tenth_run_01/                    # Sample recorded run (LiDAR, commands, odometry)
+│       └── metadata.yaml
 ├── scripts/                               # Automation & deployment scripts
 │   ├── auto_interact_marl.py             # X11 automation (Connect + Autonomous + Trackcam)
+│   ├── record_rosbag.sh                  # Automated ROS 2 bag recorder
 │   ├── record_video.sh                   # HD video recorder (GStreamer / OpenH264)
 │   ├── start_autodrive_2cars_single_sim.sh # Main 2-car launch script
 │   ├── start_autodrive_2026.sh           # RoboRacer 2026 single-car launch
@@ -356,6 +361,63 @@ bash scripts/record_video.sh
 # Record for custom duration (e.g., 30 seconds to custom destination)
 bash scripts/record_video.sh 30 ~/my_race_clip.mp4
 ```
+
+### Record ROS 2 Bag Data
+To record all live simulation topics (LiDAR pointclouds, odometry, vehicle commands, transforms, and processed scans) into a ROS 2 bag:
+
+```bash
+# 1. Create a data directory and start recording all topics:
+mkdir -p rosbags && cd rosbags
+ros2 bag record -a -o f1tenth_run_01
+```
+
+**Explanation:**
+- `ros2 bag record`: Starts recording active ROS 2 topics to disk.
+- `-a`: Records all available topics published on the computational graph.
+- `-o f1tenth_run_01`: Designates the output directory name (`rosbags/f1tenth_run_01`).
+
+This records all available topics, including LiDAR scans, vehicle commands, odometry, transforms, and processed gaps.
+
+#### Stop the Recording
+When you finish your experiment or simulation, press:
+```bash
+Ctrl + C
+```
+ROS 2 gracefully flushes remaining messages from cache and finalizes the SQLite3 bag database (`f1tenth_run_01/f1tenth_run_01_0.db3` and `metadata.yaml`).
+
+#### Verify Recorded Data
+To inspect message counts, recording duration, and topic metadata:
+```bash
+ros2 bag info rosbags/f1tenth_run_01
+```
+This displays information such as:
+- Recording duration
+- Total message count
+- Available topics & message types
+- Serialization format and storage format (SQLite3)
+
+#### Play Back Recorded Simulation
+To replay the recorded simulation run in real-time or at variable speed:
+```bash
+# Replay in real-time
+ros2 bag play rosbags/f1tenth_run_01
+
+# Replay at half speed (0.5x)
+ros2 bag play rosbags/f1tenth_run_01 --rate 0.5
+
+# Replay at double speed (2.0x)
+ros2 bag play rosbags/f1tenth_run_01 --rate 2.0
+```
+
+> [!TIP]
+> You can also use the bundled automated script to record with a single command:
+> ```bash
+> # Record for 15 seconds (default)
+> bash scripts/record_rosbag.sh f1tenth_run_01 15
+> 
+> # Record until manual Ctrl+C
+> bash scripts/record_rosbag.sh f1tenth_run_01 0
+> ```
 
 ### Clean Shutdown
 To stop the simulator, WebSocket bridge, and ROS 2 nodes cleanly:
