@@ -5,6 +5,7 @@
 [![Simulator](https://img.shields.io/badge/AutoDRIVE_Simulator-v0.3.0-FF6F00?style=for-the-badge&logo=unity&logoColor=white)](https://autodrive-ecosystem.github.io/)
 [![Planner](https://img.shields.io/badge/Global_Planner-A*-brightgreen?style=for-the-badge)](https://github.com/widegonz/Global_Planner)
 [![Smoother](https://img.shields.io/badge/Spline-PCHIP-blueviolet?style=for-the-badge)](https://scipy.org/)
+[![YouTube Demonstration](https://img.shields.io/badge/YouTube-Watch%20Path%20Planning%20Demo-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://youtu.be/7aDbcEJyoDI)
 
 ---
 
@@ -14,7 +15,12 @@ This repository contains the complete implementation of **Tutorial 5: F1TENTH Gl
 Unlike reactive controllers (such as Follow The Gap) which react purely to live LiDAR scans, global path planning computes an optimal, collision-free route from a start coordinate to a goal coordinate before the vehicle moves.
 
 <div align="center">
-  <img src="../media/path_planning_live_walkthrough.png" alt="Path Planning 4-Stage Walkthrough" width="95%"/>
+  <a href="https://youtu.be/7aDbcEJyoDI" target="_blank">
+    <img src="../media/path_planning_live_walkthrough.png" alt="Path Planning 4-Stage Walkthrough - Click to Watch on YouTube" width="95%"/>
+  </a>
+  <p align="center">
+    ▶️ <b><a href="https://youtu.be/7aDbcEJyoDI">Click on the image above or here to watch the full Tutorial 5 Path Planning comparison on YouTube!</a></b>
+  </p>
 </div>
 
 ---

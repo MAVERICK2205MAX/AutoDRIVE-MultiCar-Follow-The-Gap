@@ -56,6 +56,7 @@
 
 ## 🗺️ Tutorial 5: Global Path Planning & Trajectory Smoothing
 
+[![YouTube Demonstration](https://img.shields.io/badge/YouTube-Watch%20Tutorial%205%20Demo-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://youtu.be/7aDbcEJyoDI)
 > 📘 **Full Documentation Guide**: [docs/TUTORIAL_5_GLOBAL_PATH_PLANNING.md](docs/TUTORIAL_5_GLOBAL_PATH_PLANNING.md)
 
 This section implements **Global Path Planning** on the AutoDRIVE F1TENTH track, adapting the instructor base repository (`widegonz/Global_Planner`).
@@ -63,7 +64,13 @@ This section implements **Global Path Planning** on the AutoDRIVE F1TENTH track,
 Unlike reactive navigation (Follow The Gap) which computes steering purely from live LiDAR scans, global path planning computes an optimal offline trajectory from a saved SLAM map before the vehicle moves.
 
 <div align="center">
-  <img src="media/path_planning_live_walkthrough.png" alt="Path Planning 4-Stage Walkthrough" width="95%"/>
+  <a href="https://youtu.be/7aDbcEJyoDI" target="_blank">
+    <img src="media/path_planning_live_walkthrough.png" alt="Path Planning 4-Stage Walkthrough - Click to Watch on YouTube" width="95%"/>
+  </a>
+  <p align="center">
+    ▶️ <b><a href="https://youtu.be/7aDbcEJyoDI">Click on the image above or here to watch the full Tutorial 5 Path Planning & Trajectory Smoothing comparison on YouTube!</a></b><br/>
+    <i>Demonstrates metric map preparation, virtual wall addition, A* vs PCHIP trajectory smoothing, obstacle clearance validation, and RViz2 visualization.</i>
+  </p>
 </div>
 
 ### 🏆 Key Results (A* vs. PCHIP Spline)
