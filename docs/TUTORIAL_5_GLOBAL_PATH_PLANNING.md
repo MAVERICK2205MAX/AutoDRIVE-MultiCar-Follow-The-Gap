@@ -109,6 +109,49 @@ In RViz2:
 
 ---
 
+## 💾 ROS 2 Bag Recording & Replay
+
+To record or replay the full global path planning run (map, raw trajectory, smoothed trajectory, and simulated vehicle traversal) into a ROS 2 bag:
+
+### 1. Inspect Bag Information
+```bash
+ros2 bag info rosbags/f1tenth_path_planning_run
+```
+**Recorded Topics & Message Counts:**
+| Topic | Message Type | Count | Durability | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| `/map` | `nav_msgs/msg/OccupancyGrid` | 16 | Transient Local | 2D SLAM Circuit Occupancy Grid |
+| `/raw_path` | `nav_msgs/msg/Path` | 16 | Transient Local | 269 A* Raw Waypoints |
+| `/smoothed_path` | `nav_msgs/msg/Path` | 16 | Transient Local | 263 PCHIP Smoothed Waypoints |
+| `/tf_static` | `tf2_msgs/msg/TFMessage` | 1 | Transient Local | Static `map -> odom` transform |
+| `/tf` | `tf2_msgs/msg/TFMessage` | 300 | Volatile | Dynamic `map -> f1tenth_1` vehicle frame |
+| `/autodrive/f1tenth_1/ips` | `geometry_msgs/msg/Point` | 300 | Volatile | Vehicle IPS coordinates following trajectory |
+| `/f1tenth_1/visualization_marker` | `visualization_msgs/msg/Marker` | 300 | Volatile | 3D F1TENTH bounding box model |
+| `/rosout` | `rcl_interfaces/msg/Log` | 1 | Volatile | Planner status and node logging |
+
+### 2. Replay Bag Data
+```bash
+# Replay in real-time
+ros2 bag play rosbags/f1tenth_path_planning_run
+
+# Replay continuously in loop
+ros2 bag play rosbags/f1tenth_path_planning_run --loop
+
+# Replay at double speed (2.0x)
+ros2 bag play rosbags/f1tenth_path_planning_run --rate 2.0
+```
+
+### 3. Record a New Bag
+```bash
+# Automated 15-second recording
+bash scripts/record_path_planning_rosbag.sh f1tenth_path_planning_run 15
+
+# Python generator script
+python3 scripts/create_path_planning_rosbag.py
+```
+
+---
+
 ## 📁 Repository Structure
 ```text
 ├── docs/
@@ -121,13 +164,18 @@ In RViz2:
 │   ├── path_planning_live_walkthrough.png
 │   ├── trajectory_overlay.png
 │   └── autodrive_semiblocks_walkthrough.png
+├── rosbags/
+│   ├── f1tenth_run_01/                 # Tutorial 4 Multi-Car bag
+│   └── f1tenth_path_planning_run/      # Tutorial 5 Path Planning bag
 ├── scripts/
 │   ├── add_virtual_wall.py
 │   ├── plan_and_smooth.py
 │   ├── plot_waypoints.py
 │   ├── visualize_map.py
 │   ├── generate_comparison_video.py
-│   └── convert_webm_to_mp4.py
+│   ├── convert_webm_to_mp4.py
+│   ├── create_path_planning_rosbag.py
+│   └── record_path_planning_rosbag.sh
 ├── src/
 │   └── f1tenth_global_planner/          # ROS 2 viewer & smoother package
 └── waypoints/

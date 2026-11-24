@@ -239,11 +239,16 @@ The steering setpoint angle $\delta$ targets the center of $\text{Gap}^*$:
 │   ├── autodrive_2cars_live.png           # Trackcam screenshot of dual-car race
 │   └── autodrive_2cars_track_race.mp4     # 720p HD MP4 race recording
 ├── rosbags/                               # Recorded ROS 2 telemetry datasets
-│   └── f1tenth_run_01/                    # Sample recorded run (LiDAR, commands, odometry)
+│   ├── f1tenth_run_01/                    # Sample recorded run (LiDAR, commands, odometry)
+│   │   └── metadata.yaml
+│   └── f1tenth_path_planning_run/         # Tutorial 5 path planning bag (map, raw, smoothed, tf)
+│       ├── f1tenth_path_planning_run_0.db3
 │       └── metadata.yaml
 ├── scripts/                               # Automation & deployment scripts
 │   ├── auto_interact_marl.py             # X11 automation (Connect + Autonomous + Trackcam)
 │   ├── record_rosbag.sh                  # Automated ROS 2 bag recorder
+│   ├── create_path_planning_rosbag.py    # Path planning ROS 2 bag generator
+│   ├── record_path_planning_rosbag.sh    # Path planning bag recorder script
 │   ├── record_video.sh                   # HD video recorder (GStreamer / OpenH264)
 │   ├── start_autodrive_2cars_single_sim.sh # Main 2-car launch script
 │   ├── start_autodrive_2026.sh           # RoboRacer 2026 single-car launch
@@ -465,6 +470,20 @@ ros2 bag play rosbags/f1tenth_run_01 --rate 2.0
 > # Record until manual Ctrl+C
 > bash scripts/record_rosbag.sh f1tenth_run_01 0
 > ```
+
+#### Global Path Planning Bag (`f1tenth_path_planning_run`)
+To inspect or replay the Tutorial 5 global path planning run (`/map`, `/raw_path`, `/smoothed_path`, `/tf`, `/autodrive/f1tenth_1/ips`):
+
+```bash
+# 1. Inspect bag metadata and topic counts:
+ros2 bag info rosbags/f1tenth_path_planning_run
+
+# 2. Replay bag into RViz2 or AutoDRIVE in continuous loop:
+ros2 bag play rosbags/f1tenth_path_planning_run --loop
+
+# 3. Re-record a custom planning bag:
+bash scripts/record_path_planning_rosbag.sh f1tenth_path_planning_run 15
+```
 
 ### Clean Shutdown
 To stop the simulator, WebSocket bridge, and ROS 2 nodes cleanly:
