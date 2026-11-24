@@ -1,0 +1,10 @@
+free_thresh: 0.25
+image: F1tenth_Map_semiblocks.pgm
+mode: trinary
+negate: 0
+occupied_thresh: 0.65
+origin:
+- -3.655
+- -8.425
+- 0.0
+resolution: 0.025

@@ -11,6 +11,7 @@
 [![Platform](https://img.shields.io/badge/Platform-Ubuntu_22.04_LTS-E95420?style=for-the-badge&logo=ubuntu&logoColor=white)](https://ubuntu.com/)
 [![YouTube](https://img.shields.io/badge/YouTube-Watch%20Live%20Demo-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://youtu.be/t3gYlpG6Nx8?si=EEaeVSPq3hgG2bVo)
 [![License](https://img.shields.io/badge/License-MIT-success?style=for-the-badge)](LICENSE)
+[![Tutorial 5](https://img.shields.io/badge/Tutorial_5-Global_Path_Planning-blueviolet?style=for-the-badge)](docs/TUTORIAL_5_GLOBAL_PATH_PLANNING.md)
 
 <br/>
 
@@ -28,6 +29,7 @@
 ---
 
 ## 📋 Table of Contents
+- [Tutorial 5: Global Path Planning (A* vs. PCHIP Spline)](#-tutorial-5-global-path-planning--trajectory-smoothing)
 - [Overview](#-overview)
 - [Video Demonstration](#-video-demonstration)
 - [Key Features](#-key-features)
@@ -49,6 +51,44 @@
   - [Clean Shutdown](#clean-shutdown)
 - [Verification & Experimental Results](#-verification--experimental-results)
 - [Helpful Links & References](#-helpful-links--references)
+
+---
+
+## 🗺️ Tutorial 5: Global Path Planning & Trajectory Smoothing
+
+> 📘 **Full Documentation Guide**: [docs/TUTORIAL_5_GLOBAL_PATH_PLANNING.md](docs/TUTORIAL_5_GLOBAL_PATH_PLANNING.md)
+
+This section implements **Global Path Planning** on the AutoDRIVE F1TENTH track, adapting the instructor base repository (`widegonz/Global_Planner`).
+
+Unlike reactive navigation (Follow The Gap) which computes steering purely from live LiDAR scans, global path planning computes an optimal offline trajectory from a saved SLAM map before the vehicle moves.
+
+<div align="center">
+  <img src="media/path_planning_live_walkthrough.png" alt="Path Planning 4-Stage Walkthrough" width="95%"/>
+</div>
+
+### 🏆 Key Results (A* vs. PCHIP Spline)
+* **Virtual Wall Solution**: A $0.15\text{ m}$ virtual barrier placed at $Y = 4.05\text{ m}$ prevents a $1\text{ m}$ backward shortcut and forces a full $26.24\text{ m}$ lap.
+* **Lap Length**: $\mathbf{26.24\text{ m}}$ (matches optimal circuit line).
+* **Obstacle Clearance**: Minimum $0.285\text{ m}$ (safely exceeds $0.20\text{ m}$ robot radius).
+* **Collision Safety**: $\mathbf{0 / 263\text{ points}}$ below $0.20\text{ m}$ ($100\%$ collision-free).
+* **Exported Waypoints**: [waypoints/smoothed_path.csv](waypoints/smoothed_path.csv) ($263\text{ points}$, $\Delta s = 0.10\text{ m}$).
+
+<div align="center">
+  <img src="media/trajectory_overlay.png" alt="A* vs PCHIP Trajectory Overlay" width="70%"/>
+</div>
+
+### ⚡ Quick Commands (Two-Terminal Rule)
+```bash
+# Terminal A (Planner Virtualenv):
+source ~/planner_venv/bin/activate
+python scripts/plan_and_smooth.py maps/F1tenth_Map_walled.yaml \
+  --repo ~/Global_Planner --start 0.792 3.535 --goal 0.600 4.701 \
+  --planner a_star --smoother pchip --factor 4 --inflate --out-dir waypoints
+
+# Terminal B (ROS 2 / RViz2 Visualizer):
+source /opt/ros/humble/setup.bash
+ros2 launch f1tenth_global_planner view_paths_launch.py
+```
 
 ---
 
